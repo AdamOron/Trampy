@@ -8,7 +8,7 @@ namespace Disassembler
 	@param repBuffer is a byte-buffer which stores the replicated code.
 	@param repBufferSize is the size of the replicated code's buffer.
 	*/
-	void EnableReplicating(
+	void EnableReplication(
 		PBYTE repBuffer,
 		SIZE_T repBufferSize,
 		OUT SIZE_T *pReplicatedAmount
@@ -16,7 +16,7 @@ namespace Disassembler
 	/*
 	Disables the replication.
 	*/
-	void DisableReplicating();
+	void DisableReplication();
 
 	/*
 	Disassemble & replicate given bytes of machine code.

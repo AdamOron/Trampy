@@ -97,7 +97,7 @@ Enable replication of machine code.
 @param repBufferSize is the size of the replicated code's buffer.
 @param pReplicatedAmount is the amount of replicated bytes.
 */
-void Disassembler::EnableReplicating(PBYTE repBuffer, SIZE_T repBufferSize, OUT SIZE_T *pReplicatedAmount)
+void Disassembler::EnableReplication(PBYTE repBuffer, SIZE_T repBufferSize, SIZE_T *pReplicatedAmount)
 {
 	g_Rep = { TRUE, repBuffer, repBufferSize, repBuffer, pReplicatedAmount };
 }
@@ -105,7 +105,7 @@ void Disassembler::EnableReplicating(PBYTE repBuffer, SIZE_T repBufferSize, OUT 
 /*
 Disables the replication.
 */
-void Disassembler::DisableReplicating()
+void Disassembler::DisableReplication()
 {
 	g_Rep.bEnabled = FALSE;
 }
