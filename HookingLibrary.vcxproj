@@ -20,17 +20,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Console.h" />
-    <ClInclude Include="src\hooklib\disasm\defs.h" />
+    <ClInclude Include="src\hooklib\defs.h" />
     <ClInclude Include="src\hooklib\disasm\disasm.h" />
     <ClInclude Include="src\hooklib\disasm\instr\MOD_REG_RM.h" />
     <ClInclude Include="src\hooklib\disasm\instr\OPCODE.h" />
     <ClInclude Include="src\hooklib\disasm\instr\OPERAND.h" />
     <ClInclude Include="src\hooklib\disasm\instr\SIB.h" />
+    <ClInclude Include="src\hooklib\hook.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Console.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\hooklib\disasm\disasm.cpp" />
+    <ClCompile Include="src\hooklib\hook.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

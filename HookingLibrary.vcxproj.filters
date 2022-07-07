@@ -27,13 +27,16 @@
     <ClInclude Include="src\hooklib\disasm\instr\SIB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\disasm\defs.h">
+    <ClInclude Include="src\hooklib\defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\hooklib\disasm\disasm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hooklib\hook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -45,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hooklib\hook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
