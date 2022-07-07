@@ -5,7 +5,6 @@
 #include "hooklib/disasm/disasm.h"
 
 using Signature = void (__cdecl *) (int);
-
 Signature g_TestFunc = NULL;
 
 extern "C" __declspec(dllexport)
@@ -16,10 +15,21 @@ void __cdecl PatchedFunc(int a)
     g_TestFunc(10);
 }
 
+/*
+Struct defining a single-operand instruction (e.g. JMPs, CALLs, e.t.c).
+This struct is not padded, its size is exactly 5 bytes.
+*/
 #pragma pack(push, 1)
 typedef struct _INSTR_SINGLE_OP
 {
+    /*
+    This instruction's opcode.
+    */
     BYTE Opcode;
+    /*
+    This instruction's operand.
+    Assumes it's a 4-byte (DWORD) operand.
+    */
     DWORD Operand;
 }
 INSTR_SINGLE_OP, *PINSTR_SINGLE_OP;
@@ -27,16 +37,42 @@ INSTR_SINGLE_OP, *PINSTR_SINGLE_OP;
 
 #define MAX_INSTR_SIZE 15
 
+/*
+Struct describing a Hook.
+*/
 typedef struct _HOOK_DESCRIPTOR
 {
+    /*
+    Is the Hook enabled.
+    */
     BOOL bEnabled;
+    /*
+    Pointer to the Hook's Original function.
+    */
     LPVOID pOriginal;
+    /*
+    Pointer to the Hook's Hook function.
+    */
     LPVOID pHooked;
+    /*
+    Pointer to the target Trampoline function.
+    Once created, this pointer will direct to the Trampoline.
+    */
     LPVOID *ppTrampoline;
 
+    /*
+    Anonymous struct defining a StolenBytes buffer.
+    */
     struct
     {
+        /*
+        The byte-buffer itself, with a capacity of MAX_INSTR_SIZE, 
+        as we won't need to steal more than a single instruction.
+        */
         BYTE Buffer[MAX_INSTR_SIZE];
+        /*
+        The amount of stolen bytes stored in the buffer.
+        */
         SIZE_T Amount;
     }
     StolenBytes;
@@ -45,16 +81,26 @@ HOOK_DESCRIPTOR, *PHOOK_DESCRIPTOR;
 
 std::vector<HOOK_DESCRIPTOR> g_Hooks;
 
-PHOOK_DESCRIPTOR CreateHook(LPVOID pOriginal, LPVOID pPatched, LPVOID *ppTrampoline)
+/*
+Creates a Hook desriptor.
+@param pOriginal, pointer to the original function.
+@param pHooked, pointer to the hooked function.
+@param ppTrampoline, pointer to the destination trampoline function.
+*/
+PHOOK_DESCRIPTOR CreateHook(LPVOID pOriginal, LPVOID pHooked, LPVOID *ppTrampoline)
 {
+    /* Push empty HOOK_DESCRIPTOR to Hook list */
     g_Hooks.push_back({ });
 
+    /* Extract pointer to newly created Hook */
     PHOOK_DESCRIPTOR pHook = &g_Hooks.back();
+    /* Initialize newly created Hook */
     pHook->bEnabled = FALSE;
     pHook->pOriginal = pOriginal;
-    pHook->pHooked = pPatched;
+    pHook->pHooked = pHooked;
     pHook->ppTrampoline = ppTrampoline;
 
+    /* Return pointer to newly created Hook */
     return pHook;
 }
 
@@ -63,22 +109,30 @@ Write into protected memory region.
 @param pDest, the destination of our data.
 @param pSrc, the data we want to write.
 @param byteAmount, the amount of bytes we want to write.
+@return TRUE if the function succeeds, FALSE if it fails.
 */
-void ProtectedWrite(LPVOID pDest, LPVOID pSrc, SIZE_T byteAmount)
+BOOL ProtectedWrite(LPVOID pDest, LPVOID pSrc, SIZE_T byteAmount)
 {
     DWORD oldProtect;
-    /* Make protected destination writable */
-    if (VirtualProtect(
+    /*
+    Make protected destination writable.
+    If VirtualProtect returns FALSE, it failed.
+    */
+    if (!VirtualProtect(
         pDest,
         byteAmount,
         PAGE_EXECUTE_READWRITE,
         &oldProtect
     ))
     {
-        // Error
+        printf("ProtectedWrite failed: VirtualProtect returned FALSE.\n");
+        return FALSE;
     }
 
-    /* Copy bytes from from source to destination */
+    /*
+    Copy bytes from from source to destination.
+    If memcpy_s returns non-zero, it failed.
+    */
     if (memcpy_s(
         pDest,
         byteAmount,
@@ -86,19 +140,26 @@ void ProtectedWrite(LPVOID pDest, LPVOID pSrc, SIZE_T byteAmount)
         byteAmount
     ))
     {
-        // Error
+        printf("ProtectedWrite failed: memcpy_s returned non-zero.\n");
+        return FALSE;
     }
 
-    /* Make protected destination writable again */
-    if (VirtualProtect(
+    /*
+    Revert protection change.
+    If VirtualProtect returns FALSE, it failed.
+    */
+    if (!VirtualProtect(
         pDest,
         byteAmount,
         oldProtect,
         &oldProtect
     ))
     {
-        // Error
+        printf("ProtectedWrite failed: VirtualProtect returned FALSE.\n");
+        return FALSE;
     }
+
+    return TRUE;
 }
 
 /*
@@ -140,6 +201,11 @@ void WriteJmpToOriginal(PHOOK_DESCRIPTOR pHook, PBYTE pTrampoline, SIZE_T replic
     *(PINSTR_SINGLE_OP) ipAfterReplicated = { 0xE9 /* JMP*/, offsetToOriginal};
 }
 
+/*
+Creates Trampoline function.
+@param pHook, the Hook's descriptor.
+@return pointer to the created Trampoline function, or FALSE if the function failed.
+*/
 LPVOID CreateTrampoline(PHOOK_DESCRIPTOR pHook)
 {
     /* Allocate memory for Trampoline Function */
@@ -149,7 +215,7 @@ LPVOID CreateTrampoline(PHOOK_DESCRIPTOR pHook)
     /* If failed to allocate Trampoline Function, throw error */
     if (!pTrampoline)
     {
-        printf("Failed to create Trampoline Function: VirtualAlloc returned NULL.\n");
+        printf("CreateTrampoline failed: VirtualAlloc returned NULL.\n");
         return NULL;
     }
 
@@ -159,9 +225,12 @@ LPVOID CreateTrampoline(PHOOK_DESCRIPTOR pHook)
     /* Write JMP instruction to Original from Trampoline, after replicated bytes */
     WriteJmpToOriginal(pHook, (PBYTE) pTrampoline, replicatedAmount);
 
-    /* Make Trampoline Function executable & read-only */
+    /*
+    Make Trampoline Function executable & read-only.
+    If VirtualProtect returns FALSE, it failed.
+    */
     DWORD oldProtect;
-    VirtualProtect(
+    if (!VirtualProtect(
         /* Start at Trampoline's base */
         pTrampoline,
         /* Protect entire Trampoline function */
@@ -170,7 +239,11 @@ LPVOID CreateTrampoline(PHOOK_DESCRIPTOR pHook)
         PAGE_EXECUTE_READ,
         /* Save old protection to variable (required) */
         &oldProtect
-    );
+    ))
+    {
+        printf("CreateTrampoline failed: VirtualProtect returned FALSE.\n");
+        return NULL;
+    }
 
     return pTrampoline;
 }
@@ -178,11 +251,15 @@ LPVOID CreateTrampoline(PHOOK_DESCRIPTOR pHook)
 /*
 Backups to-be-stolen bytes from Original to buffer.
 @param pHook, the Hook's descriptor.
+@return TRUE if the function succeeds, FALSE if it fails.
 */
-void BackupStolenBytes(PHOOK_DESCRIPTOR pHook)
+BOOL BackupStolenBytes(PHOOK_DESCRIPTOR pHook)
 {
-    /* Backup Stolen Bytes into buffer before overwriting */
-    memcpy_s(
+    /*
+    Backup Stolen Bytes into buffer before overwriting.
+    If memcpy_s returns non-zero, it failed.
+    */
+    return !memcpy_s(
         /* Copy into Stolen Bytes buffer */
         pHook->StolenBytes.Buffer,
         /* The size of the Stolen Bytes buffer */
@@ -197,8 +274,9 @@ void BackupStolenBytes(PHOOK_DESCRIPTOR pHook)
 /*
 Write JMP instruction from base of Original to Hook.
 @param pHook, the Hook's descriptor.
+@return TRUE if the function succeeds, FALSE if it fails.
 */
-void WriteJmpToHook(PHOOK_DESCRIPTOR pHook)
+BOOL WriteJmpToHook(PHOOK_DESCRIPTOR pHook)
 {
     /* IP in Original after this JMP instruction */
     PBYTE ipAfterJmp = (PBYTE) pHook->pOriginal + sizeof(INSTR_SINGLE_OP);
@@ -206,34 +284,82 @@ void WriteJmpToHook(PHOOK_DESCRIPTOR pHook)
     DWORD offsetToHook = (PBYTE) pHook->pHooked - ipAfterJmp;
     /* JMP from Original to Hook */
     INSTR_SINGLE_OP jmpToHook = { 0xE9 /* JMP */, offsetToHook};
-    /* Write the JMP instruction to the beginning of Original, with proper protection */
-    ProtectedWrite(pHook->pOriginal, &jmpToHook, sizeof(INSTR_SINGLE_OP));
+    /*
+    Write the JMP instruction to the beginning of Original, with proper protection.
+    If ProtectedWrite fails, WriteJmpToHook fails.
+    */
+    return ProtectedWrite(
+        /* Write to beginning of Original */
+        pHook->pOriginal,
+        /* Write the JMP instruction */
+        &jmpToHook,
+        /* The size of the JMP instruction */
+        sizeof(jmpToHook)
+    );
 }
 
-void EnableHook(PHOOK_DESCRIPTOR pHook)
+/*
+Enable the Hook, i.e. make it functional.
+@param pHook, the Hook's descriptor.
+@return TRUE if the function succeeds, FALSE if it fails.
+*/
+BOOL EnableHook(PHOOK_DESCRIPTOR pHook)
 {
-    *pHook->ppTrampoline = CreateTrampoline(pHook);
+    /* Create Trampoline function, save pointer to it */
+    LPVOID pTrampoline = CreateTrampoline(pHook);
 
+    /* If CreateTrampoline fails, EnableHook fails */
+    if (!pTrampoline)
+        return FALSE;
+
+    *pHook->ppTrampoline = pTrampoline; 
+
+    /* If stolen byte amount is smaller than a JMP instruction, we can't patch */
     if (pHook->StolenBytes.Amount < sizeof(INSTR_SINGLE_OP))
     {
         printf("Failed to hook function: Original function was too small (5 bytes minimum).\n");
-        return;
+        return FALSE;
     }
 
-    BackupStolenBytes(pHook);
+    /*
+    Backup to-be-stolen bytes at the beginning of Original.
+    If BackupStolenBytes fails, EnableHook fails.
+    */
+    if (!BackupStolenBytes(pHook))
+        return FALSE;
 
-    WriteJmpToHook(pHook);
+    /*
+    Write JMP from Original to Hook (overwrites first bytes in Original).
+    If WriteJmpToHook fails, EnableHook fails.
+    */
+    if (!WriteJmpToHook(pHook))
+        return FALSE;
+
+    return TRUE;
 }
 
-void DisableHook(PHOOK_DESCRIPTOR pHook)
+/*
+Disable the Hook, i.e. revert to original state.
+@param pHook, the Hook's descriptor.
+*/
+BOOL DisableHook(PHOOK_DESCRIPTOR pHook)
 {
-    ProtectedWrite(
+    /*
+    Write stolen bytes to Original.
+    If ProtectedWrite fails, DisableHook fails.
+    */
+    if (!ProtectedWrite(
         pHook->pOriginal,
         pHook->StolenBytes.Buffer,
         pHook->StolenBytes.Amount
-    );
+    ))
+    {
+        return FALSE;
+    }
 
     pHook->bEnabled = FALSE;
+
+    return TRUE;
 }
 
 void ApplyHook()
