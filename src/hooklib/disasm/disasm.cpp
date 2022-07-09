@@ -265,7 +265,7 @@ void ParseModRM()
 	case MOD_NODISP:
 		if (pModRM->Rm != RM_BP /* 101b */)
 			break;
-		/* If we're in no-displacement mode & RM specifies SP, we have a 32-bit displacement-only instruction */
+		/* If we're in no-displacement mode & RM specifies BP, we have a 32-bit displacement-only instruction */
 	case MOD_DISP32:
 		/* If we're in 32-bit displacement mode, consume 4 bytes (32 bits) */
 		AdvanceAndRep(4);
