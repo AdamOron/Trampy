@@ -263,7 +263,7 @@ void ParseModRM()
 		break;
 
 	case MOD_NODISP:
-		if (pModRM->Rm != RM_SP /* 100b */)
+		if (pModRM->Rm != RM_BP /* 101b */)
 			break;
 		/* If we're in no-displacement mode & RM specifies SP, we have a 32-bit displacement-only instruction */
 	case MOD_DISP32:
