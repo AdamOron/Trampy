@@ -12,6 +12,7 @@ Creates a Hook desriptor.
 @param pOriginal, pointer to the original function.
 @param pHooked, pointer to the hooked function.
 @param ppTrampoline, pointer to the destination trampoline function.
+@return pointer to the newly created Hook within the Hook list.
 */
 PHOOK_DESCRIPTOR CreateHook(LPVOID pOriginal, LPVOID pHooked, LPVOID *ppTrampoline);
 
@@ -25,5 +26,6 @@ BOOL EnableHook(PHOOK_DESCRIPTOR pHook);
 /*
 Disable the Hook, i.e. revert to original state.
 @param pHook, the Hook's descriptor.
+@return TRUE if the Hook was succesfully disabled, FALSE otherwise.
 */
 BOOL DisableHook(PHOOK_DESCRIPTOR pHook);
