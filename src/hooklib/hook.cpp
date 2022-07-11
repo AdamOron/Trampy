@@ -343,7 +343,7 @@ Disable the Hook, i.e. revert to original state.
 BOOL DisableHook(PHOOK_DESCRIPTOR pHook)
 {
     /* If Hook isn't enabled, don't disable it */
-    if (!pHook->bEnabled)
+    if (pHook->bEnabled)
         return FALSE;
 
     /*
