@@ -115,7 +115,7 @@ Initialize the disassembler.
 */
 void InitializeDisassembler()
 {
-	g_Disasm = { NULL, NULL, NULL, NULL };
+	g_Disasm = { NULL };
 }
 
 /*
