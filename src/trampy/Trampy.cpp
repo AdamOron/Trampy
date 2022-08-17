@@ -1,4 +1,4 @@
-#include "hook.h"
+#include "Trampy.h"
 #include <vector>
 
 /*
@@ -84,7 +84,7 @@ Creates a Hook desriptor.
 @param ppTrampoline, pointer to the destination trampoline function.
 @return pointer to the newly created Hook within the Hook list.
 */
-PHOOK_DESCRIPTOR CreateHook(LPVOID pOriginal, LPVOID pHooked, LPVOID *ppTrampoline)
+PHOOK_DESCRIPTOR Trampy::CreateHook(LPVOID pOriginal, LPVOID pHooked, LPVOID *ppTrampoline)
 {
     /* Push empty HOOK_DESCRIPTOR to Hook list */
     g_Hooks.push_back({ });
@@ -300,7 +300,7 @@ Enable the Hook, i.e. make it functional.
 @param pHook, the Hook's descriptor.
 @return TRUE if the function succeeds, FALSE if it fails.
 */
-BOOL EnableHook(PHOOK_DESCRIPTOR pHook)
+BOOL Trampy::EnableHook(PHOOK_DESCRIPTOR pHook)
 {
     /* Create Trampoline function, save pointer to it */
     LPVOID pTrampoline = CreateTrampoline(pHook);
@@ -340,7 +340,7 @@ Disable the Hook, i.e. revert to original state.
 @param pHook, the Hook's descriptor.
 @return TRUE if the Hook was succesfully disabled, FALSE otherwise.
 */
-BOOL DisableHook(PHOOK_DESCRIPTOR pHook)
+BOOL Trampy::DisableHook(PHOOK_DESCRIPTOR pHook)
 {
     /* If Hook isn't enabled, don't disable it */
     if (pHook->bEnabled)

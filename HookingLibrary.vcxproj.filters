@@ -15,42 +15,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\hooklib\disasm\instr\MOD_REG_RM.h">
+    <ClInclude Include="src\trampy\disasm\instr\ModRegRM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\disasm\instr\OPCODE.h">
+    <ClInclude Include="src\trampy\disasm\instr\Opcode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\disasm\instr\OPERAND.h">
+    <ClInclude Include="src\trampy\disasm\instr\Operand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\disasm\instr\SIB.h">
+    <ClInclude Include="src\trampy\disasm\instr\SIB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\defs.h">
+    <ClInclude Include="src\trampy\defs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\disasm\disasm.h">
+    <ClInclude Include="src\trampy\disasm\disasm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Console.h">
+    <ClInclude Include="src\console\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\hooklib\hook.h">
+    <ClInclude Include="src\trampy\Trampy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trampy\disasm\instr\OpcodeMaps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\hooklib\disasm\disasm.cpp">
+    <ClCompile Include="src\trampy\disasm\disasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Console.cpp">
+    <ClCompile Include="src\console\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\hooklib\hook.cpp">
+    <ClCompile Include="src\trampy\Trampy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

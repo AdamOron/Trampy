@@ -1,7 +1,8 @@
 #include "disasm.h"
-#include "instr/OPCODE.h"
-#include "instr/MOD_REG_RM.h"
+#include "instr/Opcode.h"
+#include "instr/ModRegRM.h"
 #include "instr/SIB.h"
+#include "instr/OpcodeMaps.h"
 #include <stdio.h>
 
 /* Max amount of prefixes allowed per instruction */

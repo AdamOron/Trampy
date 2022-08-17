@@ -1,10 +1,15 @@
 #include <Windows.h>
-#include "Console.h"
 #include <stdio.h>
-#include "hooklib/hook.h"
+#include "trampy/Trampy.h"
 
 using Signature = void (__cdecl *) (int);
 Signature g_TestFunc = NULL;
+
+extern "C" __declspec(dllexport)
+void __cdecl TestFunc(int a)
+{
+    printf("I am the Original: %d\n", a);
+}
 
 extern "C" __declspec(dllexport)
 void __cdecl PatchedFunc(int a)
@@ -18,17 +23,18 @@ void ApplyHook()
 {
     FARPROC pTestFunc = GetProcAddress(GetModuleHandle(0), "TestFunc");
 
-    PHOOK_DESCRIPTOR pHook = CreateHook(pTestFunc, PatchedFunc, (PVOID *) &g_TestFunc);
+    PHOOK_DESCRIPTOR pHook = Trampy::CreateHook(pTestFunc, PatchedFunc, (PVOID *) &g_TestFunc);
 
-    EnableHook(pHook);
+    Trampy::EnableHook(pHook);
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+int main()
 {
-    if (ul_reason_for_call == DLL_PROCESS_ATTACH)
-    {
-        ApplyHook();
-    }
+    TestFunc(3);
 
-    return TRUE;
+    ApplyHook();
+
+    TestFunc(3);
+
+    return 0;
 }
