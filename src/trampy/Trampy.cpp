@@ -338,6 +338,9 @@ BOOL Trampy::EnableHook(PHOOK_DESCRIPTOR pHook)
     if (!WriteJmpToHook(pHook))
         return FALSE;
 
+    /* Mark the Hook as enabled */
+    pHook->bEnabled = TRUE;
+
     return TRUE;
 }
 
@@ -364,7 +367,7 @@ Disable the Hook, i.e. revert to original state.
 BOOL Trampy::DisableHook(PHOOK_DESCRIPTOR pHook)
 {
     /* If Hook isn't enabled, don't disable it */
-    if (pHook->bEnabled)
+    if (!pHook->bEnabled)
         return FALSE;
 
     /*
@@ -380,6 +383,7 @@ BOOL Trampy::DisableHook(PHOOK_DESCRIPTOR pHook)
         return FALSE;
     }
 
+    /* Mark the Hook as disabled */
     pHook->bEnabled = FALSE;
 
     return TRUE;
