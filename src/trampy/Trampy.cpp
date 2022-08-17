@@ -1,5 +1,7 @@
 #include "Trampy.h"
 #include <vector>
+#include "disasm/disasm.h"
+#include "TrampyDefs.h"
 
 /*
 The maximum size of a single instruction.
@@ -55,6 +57,10 @@ typedef struct _HOOK_DESCRIPTOR
 }
 HOOK_DESCRIPTOR, *PHOOK_DESCRIPTOR;
 
+/*
+Store all hooks in a global vector.
+This is bad practice to an extent, but serves me well at this stage.
+*/
 std::vector<HOOK_DESCRIPTOR> g_Hooks;
 
 /*
@@ -336,6 +342,21 @@ BOOL Trampy::EnableHook(PHOOK_DESCRIPTOR pHook)
 }
 
 /*
+Enable all Hooks, i.e. make them all functional.
+@return TRUE if all Hooks were enabled successfully, FALSE otherwise.
+*/
+BOOL Trampy::EnableAllHooks()
+{
+    BOOL bEnabledAll = TRUE;
+
+    for (HOOK_DESCRIPTOR &hook : g_Hooks)
+        if (!EnableHook(&hook))
+            bEnabledAll = FALSE;
+
+    return bEnabledAll;
+}
+
+/*
 Disable the Hook, i.e. revert to original state.
 @param pHook, the Hook's descriptor.
 @return TRUE if the Hook was succesfully disabled, FALSE otherwise.
@@ -362,4 +383,27 @@ BOOL Trampy::DisableHook(PHOOK_DESCRIPTOR pHook)
     pHook->bEnabled = FALSE;
 
     return TRUE;
+}
+
+/*
+Disable all Hooks, i.e. revert to original state.
+@return TRUE if all Hooks were disabled successfully, FALSE otherwise.
+*/
+BOOL Trampy::DisableAllHooks()
+{
+    /* Erase from g_Hooks vector */
+    g_Hooks.erase(
+        /* Construct iterator for all Hooks we want to erase */
+        std::remove_if(
+            /* From the beginning to the end of the vector */
+            g_Hooks.begin(), g_Hooks.end(),
+            /* Erase all Hooks that were successfully disabled */
+            [](HOOK_DESCRIPTOR &hook) { return DisableHook(&hook); }
+        ),
+        /* Erase all Hooks in the newly constructed iterator */
+        g_Hooks.end()
+    );
+
+    /* If g_Hooks is empty, all DisableHook calls were successful */
+    return g_Hooks.empty();
 }

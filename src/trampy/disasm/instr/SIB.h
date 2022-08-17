@@ -1,5 +1,5 @@
 #pragma once
-#include "../defs.h"
+#include "../TrampyDefs.h"
 
 /*
 Specifies Base of the Scaled Index.

@@ -1,5 +1,5 @@
 #pragma once
-#include "../defs.h"
+#include "../TrampyDefs.h"
 
 namespace Disassembler
 {

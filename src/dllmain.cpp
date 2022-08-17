@@ -15,24 +15,23 @@ extern "C" __declspec(dllexport)
 void __cdecl PatchedFunc(int a)
 {
     printf("I am the Patched: %d\n", a);
-
-    g_TestFunc(10);
-}
-
-void ApplyHook()
-{
-    FARPROC pTestFunc = GetProcAddress(GetModuleHandle(0), "TestFunc");
-
-    PHOOK_DESCRIPTOR pHook = Trampy::CreateHook(pTestFunc, PatchedFunc, (PVOID *) &g_TestFunc);
-
-    Trampy::EnableHook(pHook);
 }
 
 int main()
 {
+    PHOOK_DESCRIPTOR pHook = Trampy::CreateHook(
+        GetProcAddress(GetModuleHandle(0), "TestFunc"),
+        PatchedFunc,
+        (PVOID *) &g_TestFunc
+    );
+
     TestFunc(3);
 
-    ApplyHook();
+    Trampy::EnableAllHooks();
+
+    TestFunc(3);
+
+    Trampy::DisableAllHooks();
 
     TestFunc(3);
 

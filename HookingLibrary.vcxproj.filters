@@ -27,7 +27,7 @@
     <ClInclude Include="src\trampy\disasm\instr\SIB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\trampy\defs.h">
+    <ClInclude Include="src\trampy\TrampyDefs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\trampy\disasm\disasm.h">

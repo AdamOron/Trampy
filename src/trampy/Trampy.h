@@ -1,5 +1,5 @@
 #pragma once
-#include "disasm/disasm.h"
+#include <Windows.h>
 
 /*
 Definition of the Hook's descriptor struct.
@@ -28,6 +28,11 @@ namespace Trampy
 	@return TRUE if the function succeeds, FALSE if it fails.
 	*/
 	BOOL EnableHook(PHOOK_DESCRIPTOR pHook);
+	/*
+	Enable all Hooks, i.e. make them all functional.
+	@return TRUE if all Hooks were enabled successfully, FALSE otherwise.
+	*/
+	BOOL EnableAllHooks();
 
 	/*
 	Disable the Hook, i.e. revert to original state.
@@ -35,4 +40,9 @@ namespace Trampy
 	@return TRUE if the Hook was succesfully disabled, FALSE otherwise.
 	*/
 	BOOL DisableHook(PHOOK_DESCRIPTOR pHook);
+	/*
+	Disable all Hooks, i.e. revert to original state.
+	@return TRUE if all Hooks were disabled successfully, FALSE otherwise.
+	*/
+	BOOL DisableAllHooks();
 }

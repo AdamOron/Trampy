@@ -1,5 +1,5 @@
 #pragma once
-#include "../defs.h"
+#include "../TrampyDefs.h"
 
 /*
 Each Operand has an Addressing Method attribute, as described in this enum.

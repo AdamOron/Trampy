@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\console\Console.h" />
-    <ClInclude Include="src\trampy\defs.h" />
+    <ClInclude Include="src\trampy\TrampyDefs.h" />
     <ClInclude Include="src\trampy\disasm\disasm.h" />
     <ClInclude Include="src\trampy\disasm\instr\ModRegRM.h" />
     <ClInclude Include="src\trampy\disasm\instr\Opcode.h" />

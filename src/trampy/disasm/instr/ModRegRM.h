@@ -1,5 +1,5 @@
 #pragma once
-#include "../defs.h"
+#include "../TrampyDefs.h"
 
 /*
 The RM field specifies a register that's in-use.
